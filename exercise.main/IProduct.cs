@@ -28,6 +28,9 @@ namespace exercise.main
         {
             Stock += count;
         }
+
+        public string GetSKU() {  return SKU; }
+        public int GetStock() { return Stock; }
     }
     public interface IProduct
     {
