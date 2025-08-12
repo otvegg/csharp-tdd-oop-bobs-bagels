@@ -1,4 +1,5 @@
-﻿using System;
+﻿using exercise.tests;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -119,13 +120,11 @@ namespace exercise.main
                 Receipt += $"    {product.GetName()}, {product.GetVariant()} - £{product.GetPrice()}\n";
                 if (product is Bagel bagel)
                 {
-                    var fillings = bagel.GetFillings();
+                    List<Filling> fillings = bagel.GetFillings();
                     if (fillings.Count > 0)
                     {
-                        foreach (var filling in fillings)
-                        {
-                            Receipt += $"     * {filling.GetVariant()} -  £{filling.GetPrice()}\n";
-                        }
+                        foreach (var filling in fillings) Receipt += $"     * {filling.GetVariant()} -  £{filling.GetPrice()}\n";
+                        
                     }
                 }
             }
