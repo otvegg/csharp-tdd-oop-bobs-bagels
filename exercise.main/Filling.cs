@@ -5,8 +5,8 @@ namespace exercise.tests
 {
     public class Filling : Product
     {
-        public Filling(string sku, string variant, decimal price, int stock)
-             : base(sku, variant, price, stock)
+        public Filling(string sku, string variant, decimal price)
+             : base(sku, variant, price)
         {
             Name = "Filling";
         }

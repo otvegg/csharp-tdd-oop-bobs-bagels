@@ -11,8 +11,8 @@ namespace exercise.main
     public class Coffee : Product
     {
 
-        public Coffee(string sku, string variant, decimal price, int stock)
-            : base(sku, variant, price, stock)
+        public Coffee(string sku, string variant, decimal price)
+            : base(sku, variant, price)
         {
             Name = "Coffee";
         }

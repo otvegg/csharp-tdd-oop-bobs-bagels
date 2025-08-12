@@ -1,37 +1,23 @@
 namespace exercise.tests;
 using exercise.main;
+using System.Reflection.Emit;
+
 public class BasketTests
 {
+    // initiate inventory with stock mentioned in excercise description
     private Inventory _inventory =  new Inventory();
-    [SetUp]
-    public void Setup()
-    {
-        _inventory.AddProduct("BGLO", new Product("BGLO", "Onion", 0.49m));
-        _inventory.AddProduct("BGLP", new Product("BGLP", "Plain", 0.39m));
-        _inventory.AddProduct("BGLE", new Product("BGLE", "Everything", 0.49m));
-        _inventory.AddProduct("BGLS", new Product("BGLS", "Sesame", 0.49m));
-        _inventory.AddProduct("COFB", new Product("COFB", "Black", 0.99m));
-        _inventory.AddProduct("COFW", new Product("COFW", "White", 1.19m));
-        _inventory.AddProduct("COFC", new Product("COFC", "Capuccino", 1.29m));
-        _inventory.AddProduct("COFL", new Product("COFL", "Latte", 1.29m));
-        _inventory.AddProduct("FILB", new Product("FILB", "Bacon", 0.12m));
-        _inventory.AddProduct("FILE", new Product("FILE", "Egg", 0.12m));
-        _inventory.AddProduct("FILC", new Product("FILC", "Cheese", 0.12m));
-        _inventory.AddProduct("FILX", new Product("FILX", "Cream Cheese", 0.12m));
-        _inventory.AddProduct("FILS", new Product("FILS", "Smoked Salmon", 0.12m));
-        _inventory.AddProduct("FILH", new Product("FILH", "Ham", 0.12m));
-    }
 
     [Test]
     public void AddCoffeeTest()
     {
         Basket basket = new Basket();
         Assert.That(basket.GetProducts().Count(), Is.EqualTo(0));
-        basket.AddProduct(_inventory, new Coffee("BGLO", "Onion", 0.49m));
-        basket.AddProduct(_inventory, new Bagel("BGLP", "Plain", 0.39m));
+        Guid? blackCoffeId = basket.AddProduct(_inventory, new Coffee("COFB", "Onion", 0.49m));
+        Assert.That(blackCoffeId, Is.Not.Null);
 
-        Product product = basket.GetProduct("BGLO");
-        Assert.That(product.GetSKU(), Is.EqualTo("BGLO"));
+        Product product = basket.GetProduct(blackCoffeId.Value);
+        Assert.That(product.GetSKU(), Is.EqualTo("COFB"));
+    
     }
 
     [Test]
@@ -44,15 +30,29 @@ public class BasketTests
         Assert.That(success, Is.Null);
     }
 
+    [Test]
     public void AddEmptyBagelTest()
     {
         Basket basket = new Basket();
         Assert.That(basket.GetProducts().Count(), Is.EqualTo(0));
-        basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
-
-        Product product = basket.GetProduct("BGLO");
+        Guid? bagelId = basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
+        Assert.That(bagelId, Is.Not.Null);
+        Product product = basket.GetProduct(bagelId.Value);
         Assert.That(product.GetSKU(), Is.EqualTo("BGLO"));
         Assert.That(product.GetVariant(), Is.EqualTo("Onion"));
+    }
+
+    [Test]
+    public void AddTooManyBagels()
+    {
+        Basket basket = new Basket();
+        Assert.That(basket.GetProducts().Count(), Is.EqualTo(0));
+        for (int i = 0; i < 15; i++)
+        {
+            basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
+        }
+        Guid? bagelId = basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
+        Assert.That(bagelId, Is.Null);
     }
 
     [Test]
@@ -60,11 +60,24 @@ public class BasketTests
     {
         Basket basket = new Basket();
         Assert.That(basket.GetProducts().Count(), Is.EqualTo(0));
-        basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
-        basket.AddProduct(_inventory, new Bagel("BGLP", "Plain", 0.39m));
+        Bagel bagel = new Bagel("BGLP", "Plain", 0.39m);
+        bagel.AddFilling(_inventory, "FILS");
+        Guid? bagelId = basket.AddProduct(_inventory, bagel);
 
-        Product product = basket.GetProduct("BGLO");
-        Assert.That(product.GetSKU(), Is.EqualTo("BGLO"));
+        Assert.That(bagelId, Is.Not.Null);
+        
+        Product potentialBagel = basket.GetProduct(bagelId.Value);
+
+        Assert.That(potentialBagel.GetSKU(), Is.EqualTo("BGLP"));
+        
+        if (potentialBagel.GetSKU() == "BGLP")
+        {
+            Bagel ConfirmedBagel = (Bagel)potentialBagel;
+            List<Filling> fillings = ConfirmedBagel.GetFillings();
+            if (fillings.Count() > 0) {
+                Assert.That(fillings[0].GetSKU(), Is.EqualTo("FILS"));
+            }
+        }
     }
 
     [Test]
@@ -74,9 +87,10 @@ public class BasketTests
         Assert.That(basket.GetProducts().Count(), Is.EqualTo(0));
         basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
         basket.AddProduct(_inventory, new Bagel("BGLP", "Plain", 0.39m));
+        Bagel bagel = new Bagel("BGLP", "Plain", 0.39m);
+        Guid? fillingId = bagel.AddFilling(_inventory, "KOOOR");
 
-        Product product = basket.GetProduct("BGLO");
-        Assert.That(product.GetSKU(), Is.EqualTo("BGLO"));
+        Assert.That(fillingId, Is.Null);
     }
 
     [Test]
@@ -84,12 +98,15 @@ public class BasketTests
     {
         Basket basket = new Basket();
         Assert.That(basket.GetProducts().Count(), Is.EqualTo(0));
-        basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
-        basket.AddProduct(_inventory, new Bagel("BGLP", "Plain", 0.39m));
+        Guid? id1 = basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
+        Guid? id2 = basket.AddProduct(_inventory, new Bagel("BGLP", "Plain", 0.39m));
+        Guid? id3 = basket.AddProduct(_inventory, new Bagel("BGLE", "Everything", 0.39m));
 
+        Assert.That(basket.GetProducts().Count(), Is.EqualTo(3));
+
+        if (id2 == null) return;
+        bool success = basket.RemoveProduct(id2.Value); 
         Assert.That(basket.GetProducts().Count(), Is.EqualTo(2));
-        bool success = basket.RemoveProduct("BGLO");
-        Assert.That(basket.GetProducts().Count(), Is.EqualTo(1));
         Assert.That(success, Is.True);
     }
 
@@ -99,7 +116,7 @@ public class BasketTests
         Basket basket = new Basket();
         Assert.That(basket.GetProducts().Count(), Is.EqualTo(0));
 
-        bool success = basket.RemoveProduct("BGLO");
+        bool success = basket.RemoveProduct(Guid.NewGuid());
         Assert.That(success, Is.False);
     }
 
@@ -113,6 +130,25 @@ public class BasketTests
 
         Product product = basket.GetProduct("BGLO");
         Assert.That(product.GetSKU(), Is.EqualTo("BGLO"));
+    }
+
+
+    [Test]
+    public void GetProductFailTest()
+    {
+        Basket basket = new Basket();
+        Assert.That(basket.GetProducts().Count(), Is.EqualTo(0));
+
+        Product product = basket.GetProduct("BGLO");
+        Assert.That(product, Is.Null);
+    }
+
+    [Test]
+    public void CheckPriceTest()
+    {
+        decimal price = _inventory.GetProduct("BGLO").GetPrice();
+
+        Assert.That(price, Is.EqualTo(0.49m));
     }
 }
 

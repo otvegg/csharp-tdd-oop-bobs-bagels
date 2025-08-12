@@ -5,7 +5,7 @@ public class InventoryTests
     [Test]
     public void AddItemTest()
     {
-        Inventory inventory = new Inventory();
+        Inventory inventory = new Inventory(false);
         Assert.That(inventory.GetProducts().Count(), Is.EqualTo(0));
         inventory.AddProduct(new Bagel("BGLO", "Onion", (decimal)0.49));
         inventory.AddProduct(new Bagel("BGLP", "Plain", (decimal)0.39));
@@ -22,7 +22,7 @@ public class InventoryTests
     [Test]
     public void RemoveItemTest()
     {
-        Inventory inventory = new Inventory();
+        Inventory inventory = new Inventory(false);
         Assert.That(inventory.GetProducts().Count(), Is.EqualTo(0));
         inventory.AddProduct(new Bagel("BGLO", "Onion", (decimal)0.49));
         inventory.AddProduct(new Bagel("BGLP", "Plain", (decimal)0.39));
@@ -36,7 +36,7 @@ public class InventoryTests
     [Test]
     public void GetProductTest()
     {
-        Inventory inventory = new Inventory();
+        Inventory inventory = new Inventory(false);
         Assert.That(inventory.GetProducts().Count(), Is.EqualTo(0));
         inventory.AddProduct(new Bagel("BGLO", "Onion", (decimal)0.49));
         inventory.AddProduct(new Bagel("BGLP", "Plain", (decimal)0.39));
