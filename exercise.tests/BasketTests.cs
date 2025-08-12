@@ -47,7 +47,7 @@ public class BasketTests
     {
         Basket basket = new Basket();
         Assert.That(basket.GetProducts().Count(), Is.EqualTo(0));
-        for (int i = 0; i < 15; i++)
+        for (int i = 0; i < basket.GetCapacity(); i++)
         {
             basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
         }
@@ -149,6 +149,36 @@ public class BasketTests
         decimal price = _inventory.GetProduct("BGLO").GetPrice();
 
         Assert.That(price, Is.EqualTo(0.49m));
+    }
+
+    [Test]
+    public void CheckBagelOnlyReceipt()
+    {
+        Basket basket = new Basket();
+        basket.AddProduct(_inventory, new Bagel("BGLO", "Onion", 0.49m));
+
+        string received = basket.GetReceipt();
+
+
+        Assert.IsTrue(received.Contains("Bagel, Onion - £0.49"));
+        Assert.IsTrue(received.Contains("Total                  £0.49"));
+    }
+
+    [Test]
+    public void CheckBagelWithFillingReceipt()
+    {
+        Basket basket = new Basket();
+        Bagel bagel = new Bagel("BGLO", "Onion", 0.49m);
+        bagel.AddFilling(_inventory, "FILB");
+        basket.AddProduct(_inventory, bagel);
+
+        string received = basket.GetReceipt();
+
+
+
+        Assert.IsTrue(received.Contains("Bagel, Onion - £0.49"));
+        Assert.IsTrue(received.Contains("* Bacon -  £0.12"));
+        Assert.IsTrue(received.Contains("Total                  £0.61"));
     }
 }
 

@@ -10,7 +10,9 @@ namespace exercise.main
     {
         private static int Capacity = 25;
         private Dictionary<Guid, Product> products = new Dictionary<Guid, Product>();
-        private Discountable Discountable = new Discountable(); 
+
+        public int GetCapacity() => Capacity;
+
         public decimal GetBasketTotal(bool ApplyDiscount = false) {
 
             if (ApplyDiscount) {
@@ -108,5 +110,30 @@ namespace exercise.main
             else return false;
         }
 
+        public string GetReceipt()
+        {
+            string ReceiptSeperator = "\n------------------------------\n";
+            string Receipt = $"    ~~~ Bob's Bagels ~~~\n\n     {DateTime.Now}\n{ReceiptSeperator}\n";
+            foreach (var product in products.Values)
+            {
+                Receipt += $"    {product.GetName()}, {product.GetVariant()} - £{product.GetPrice()}\n";
+                if (product is Bagel bagel)
+                {
+                    var fillings = bagel.GetFillings();
+                    if (fillings.Count > 0)
+                    {
+                        foreach (var filling in fillings)
+                        {
+                            Receipt += $"     * {filling.GetVariant()} -  £{filling.GetPrice()}\n";
+                        }
+                    }
+                }
+            }
+
+            Receipt += ReceiptSeperator;
+            Receipt += $"Total                  £{GetBasketTotal(true)}";
+            return Receipt;
+
+        }
     }
 }
